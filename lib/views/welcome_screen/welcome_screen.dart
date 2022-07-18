@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget
                         maxWidth: constraint.maxWidth * .7,
                       ),
                       child: const Text(
-                        "Be part of us, Stake and Launch your own projects with khephren",
+                        "Be part of us, Stake and Launch your own projects with khephren.",
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.white,

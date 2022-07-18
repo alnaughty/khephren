@@ -10,7 +10,7 @@ import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
 import 'package:kprn/models/contract/constant_contracts.dart';
 import 'package:kprn/models/sales_details_model.dart';
-import 'package:kprn/salesContract.g.dart';
+// import 'package:kprn/salesContract.g.dart';
 import 'package:kprn/views/loading/khephren_progress.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -31,17 +31,17 @@ class _TokenDetailsState extends State<TokenDetails> {
   // final WalletService _walletService = WalletService.instance;
   // // final MyKHPRNBalanceService _myKHPRNService = MyKHPRNBalanceService.instance;
   // final WalletCredentials _creds = WalletCredentials.instance;
-  late final SalesContract _contract = SalesContract(
-    address: EthereumAddress.fromHex(
-      "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-      enforceEip55: true,
-    ),
-    client: Web3Client(
-      rpcUrl,
-      Client(),
-    ),
-    chainId: 97,
-  );
+  // late final SalesContract _contract = SalesContract(
+  //   address: EthereumAddress.fromHex(
+  //     "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
+  //     enforceEip55: true,
+  //   ),
+  //   client: Web3Client(
+  //     rpcUrl,
+  //     Client(),
+  //   ),
+  //   chainId: 97,
+  // );
   Timer? timer;
   late bool saleTypeisWhiteListed;
   late DateTime _startDate;
@@ -95,17 +95,17 @@ class _TokenDetailsState extends State<TokenDetails> {
     //   client: myMetaWallet!.ethClient,
     //   chainId: myMetaWallet!.session.chainId,
     // );
-    await _constantContracts.launchpadContract
-        .getLaunchpad(
-      EthereumAddress.fromHex(
-        "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-        enforceEip55: true,
-      ),
-    )
-        .then((value) {
-      isKYCVerified = value[2];
-      print("VALUE : $isKYCVerified");
-    });
+    // await _constantContracts.launchpadContract
+    //     .getLaunchpad(
+    //   EthereumAddress.fromHex(
+    //     "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
+    //     enforceEip55: true,
+    //   ),
+    // )
+    //     .then((value) {
+    //   isKYCVerified = value[2];
+    //   print("VALUE : $isKYCVerified");
+    // });
   }
 
   Future<void> getSymbolAndSupply() async {
@@ -114,13 +114,13 @@ class _TokenDetailsState extends State<TokenDetails> {
     //   client: myMetaWallet!.ethClient,
     //   chainId: myMetaWallet!.session.chainId,
     // );
-    await _constantContracts.khprnTokenContract.symbol().then((value) {
-      symbol = value;
-    });
-    await _constantContracts.khprnTokenContract.totalSupply().then((value) {
-      totalSupply = value / constantInt;
-      print("TOTAL : $totalSupply");
-    });
+    // await _constantContracts.khprnTokenContract.symbol().then((value) {
+    //   symbol = value;
+    // });
+    // await _constantContracts.khprnTokenContract.totalSupply().then((value) {
+    //   totalSupply = value / constantInt;
+    //   print("TOTAL : $totalSupply");
+    // });
     // await _myBalanceService.contractSymbol().then(
     //   (value) {
     //     print(value);
@@ -134,90 +134,90 @@ class _TokenDetailsState extends State<TokenDetails> {
   }
 
   void getDetails() async {
-    saleTypeisWhiteListed = await _contract.whitelist();
-    _contract.startDate().then((value) {
-      final DateTime time =
-          DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
-      _startDate = time;
-      // DateTime.parse(value.to)
-    });
+    // saleTypeisWhiteListed = await _contract.whitelist();
+    // _contract.startDate().then((value) {
+    //   final DateTime time =
+    //       DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
+    //   _startDate = time;
+    //   // DateTime.parse(value.to)
+    // });
 
-    await _contract.endDate().then((value) {
-      final DateTime time =
-          DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
-      _endDate = time;
-    });
+    // await _contract.endDate().then((value) {
+    //   final DateTime time =
+    //       DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
+    //   _endDate = time;
+    // });
 
-    isPresale = DateTime.now().compareTo(_endDate) < 0;
-    if (isPresale) {
-      presaleDifference = _endDate.difference(DateTime.now());
-      initPresaleCounter();
-    }
-    await _contract.minBuy().then(
-      (value) {
-        minBuy = value / constantInt;
-        print("MIN : $minBuy");
-      },
-    );
-    await _contract.maxBuy().then(
-      (value) {
-        maxBuy = value / constantInt;
-        print("MAX : $maxBuy");
-      },
-    );
+    // isPresale = DateTime.now().compareTo(_endDate) < 0;
+    // if (isPresale) {
+    //   presaleDifference = _endDate.difference(DateTime.now());
+    //   initPresaleCounter();
+    // }
+    // await _contract.minBuy().then(
+    //   (value) {
+    //     minBuy = value / constantInt;
+    //     print("MIN : $minBuy");
+    //   },
+    // );
+    // await _contract.maxBuy().then(
+    //   (value) {
+    //     maxBuy = value / constantInt;
+    //     print("MAX : $maxBuy");
+    //   },
+    // );
 
-    await _contract.saleToken().then((value) {
-      saleAddress = value.hex;
-    });
-    await _contract.hardCap().then((value) {
-      hardCap = value / constantInt;
-    });
-    await _contract.softCap().then((value) {
-      softCap = value / constantInt;
-    });
-    await _contract.listingPrice().then((value) {
-      listingPrice = value / constantInt;
-    });
-    await _contract.price().then((value) {
-      tokensForPresale = (1 / (value / constantInt)) * hardCap;
-      presaleRate = 1 / (value / constantInt);
-    });
-    await _contract.liquidityPercent().then((value) {
-      final double percentVal = value.toDouble();
-      // ((1/detailsObj.presale_rate) * detailsObj.hard_cap) * (detailsObj.liquidity_percent/100)
-      print("VALUE : $percentVal");
-      liquidityPercent = percentVal;
-      tokensForLiquidity = ((1 / listingPrice) * hardCap) * (percentVal / 100);
-      print("FOR LIQUIDITY : $tokensForLiquidity");
-    });
-    await _contract.liquidityLockupTime().then((value) {
-      liquidityLockupTime = value.toInt();
-      print("LOCKUP TIME $liquidityLockupTime");
-      // print(1 / ((value / constantInt).toDouble()));
-    });
-    await getSymbolAndSupply();
-    await checkKYCVerified();
-    // await _contract.
-    // await _contract.
-    // await _contract;
-    await _contract.details().then((value) {
-      setState(() {
-        _details = SalesDetailsModel(
-          name: String.fromCharCodes(value.name),
-          description: String.fromCharCodes(value.description),
-          logo: String.fromCharCodes(value.logo),
-          website: String.fromCharCodes(value.website),
-          twitter: String.fromCharCodes(value.twitter),
-          facebook: String.fromCharCodes(value.facebook),
-          instagram: String.fromCharCodes(value.instagram),
-          discord: String.fromCharCodes(value.discord),
-          telegram: String.fromCharCodes(value.telegram),
-          reddit: String.fromCharCodes(value.reddit),
-          github: String.fromCharCodes(value.github),
-          medium: String.fromCharCodes(value.medium),
-        );
-      });
-    });
+    // await _contract.saleToken().then((value) {
+    //   saleAddress = value.hex;
+    // });
+    // await _contract.hardCap().then((value) {
+    //   hardCap = value / constantInt;
+    // });
+    // await _contract.softCap().then((value) {
+    //   softCap = value / constantInt;
+    // });
+    // await _contract.listingPrice().then((value) {
+    //   listingPrice = value / constantInt;
+    // });
+    // await _contract.price().then((value) {
+    //   tokensForPresale = (1 / (value / constantInt)) * hardCap;
+    //   presaleRate = 1 / (value / constantInt);
+    // });
+    // await _contract.liquidityPercent().then((value) {
+    //   final double percentVal = value.toDouble();
+    //   // ((1/detailsObj.presale_rate) * detailsObj.hard_cap) * (detailsObj.liquidity_percent/100)
+    //   print("VALUE : $percentVal");
+    //   liquidityPercent = percentVal;
+    //   tokensForLiquidity = ((1 / listingPrice) * hardCap) * (percentVal / 100);
+    //   print("FOR LIQUIDITY : $tokensForLiquidity");
+    // });
+    // await _contract.liquidityLockupTime().then((value) {
+    //   liquidityLockupTime = value.toInt();
+    //   print("LOCKUP TIME $liquidityLockupTime");
+    //   // print(1 / ((value / constantInt).toDouble()));
+    // });
+    // await getSymbolAndSupply();
+    // await checkKYCVerified();
+    // // await _contract.
+    // // await _contract.
+    // // await _contract;
+    // await _contract.details().then((value) {
+    //   setState(() {
+    //     _details = SalesDetailsModel(
+    //       name: String.fromCharCodes(value.name),
+    //       description: String.fromCharCodes(value.description),
+    //       logo: String.fromCharCodes(value.logo),
+    //       website: String.fromCharCodes(value.website),
+    //       twitter: String.fromCharCodes(value.twitter),
+    //       facebook: String.fromCharCodes(value.facebook),
+    //       instagram: String.fromCharCodes(value.instagram),
+    //       discord: String.fromCharCodes(value.discord),
+    //       telegram: String.fromCharCodes(value.telegram),
+    //       reddit: String.fromCharCodes(value.reddit),
+    //       github: String.fromCharCodes(value.github),
+    //       medium: String.fromCharCodes(value.medium),
+    //     );
+    //   });
+    // });
   }
 
   final TextStyle whiteStyle = const TextStyle(

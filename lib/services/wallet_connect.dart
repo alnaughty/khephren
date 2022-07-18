@@ -1,6 +1,5 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
-import 'package:web3dart/web3dart.dart';
 
 class WalletConnectService {
   WalletConnectService._singleton();
