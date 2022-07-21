@@ -11,6 +11,7 @@ class ConstantContracts {
   static ConstantContracts get instance => _instance;
   static final Client _httpClient = Client();
   static final Web3Client _ethClient = Web3Client(rpcUrl, _httpClient);
+  Web3Client get ethClient => _ethClient;
   // final KephrenTokenContract khprnTokenContract = KephrenTokenContract(
   //   address: EthereumAddress.fromHex(khprnHex),
   //   client: _ethClient,

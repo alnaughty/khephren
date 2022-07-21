@@ -3,7 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/main.dart';
 import 'package:kprn/models/contract/constant_contracts.dart';
+import 'package:kprn/services/wallet_connect.dart';
 import 'package:kprn/views/loading/khephren_progress.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,50 +17,81 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final ConstantContracts _constantContracts = ConstantContracts.instance;
-  // final WalletService _service = WalletService.instance;
+  final WalletConnectService _service = WalletConnectService.instance;
   void checkAccountAvailability() async {
-    await Future.delayed(const Duration(seconds: 3));
-    Navigator.pushReplacementNamed(context, '/start_screen');
-    // if (cacher != null) {
-    //   String? tok = cacher!.accountToken;
-    //   setState(() {
-    //     accountId = tok;
-    //   });
-    //   await Future.delayed(const Duration(seconds: 1));
-    //   if (tok != null) {
-    //     await _service.connect(
-    //       idCallback: (String? n) async {
-    //         print("ID CALLBACK : $n");
-    //         if (n != null) {
-    //           setState(() {
-    //             accountId = n;
-    //           });
-    //           Navigator.pushReplacementNamed(
-    //             context,
-    //             '/landing_page',
-    //             arguments: true,
-    //           );
-    //         } else {
-    //           myMetaWallet = null;
-    //           tokenSymbol = "KHPRN";
-    //           accountId = null;
-    //           await _service.disconnect();
-    //           Navigator.pushReplacementNamed(context, '/start_screen');
-    //         }
-    //       },
-    //     ).then((val) async {
-    //       if (!val) {
-    //         myMetaWallet = null;
-    //         tokenSymbol = "KHPRN";
-    //         accountId = null;
-    //         await _service.disconnect();
-    //       }
-    //     });
-    //   } else {
-    //     Navigator.pushReplacementNamed(context, '/start_screen');
-    //   }
-    //   setState(() {});
-    // }
+    // await Future.delayed(const Duration(seconds: 3));
+    // Navigator.pushReplacementNamed(context, '/start_screen');
+    String? tok = cacher.ethereumAddress;
+    if (tok != null) {
+      await _service.connect(
+          // idCallback: (String? n) async {
+          //   print("ID CALLBACK : $n");
+          //   if (n != null) {
+          //     setState(() {
+          //       accountId = n;
+          //     });
+          //     Navigator.pushReplacementNamed(
+          //       context,
+          //       '/landing_page',
+          //       arguments: true,
+          //     );
+          //   } else {
+          //     myMetaWallet = null;
+          //     tokenSymbol = "KHPRN";
+          //     accountId = null;
+          //     await _service.disconnect();
+          //     Navigator.pushReplacementNamed(context, '/start_screen');
+          //   }
+          // },
+          );
+      //     .then((val) async {
+      //   if (!val) {
+      //     myMetaWallet = null;
+      //     tokenSymbol = "KHPRN";
+      //     accountId = null;
+      //     await _service.disconnect();
+      //   }
+      // });
+      // setState(() {
+      //   accountId = tok;
+      // });
+      // await Future.delayed(const Duration(seconds: 1));
+      // if (tok != null) {
+      //   // await _service.connect(
+      //   //   idCallback: (String? n) async {
+      //   //     print("ID CALLBACK : $n");
+      //   //     if (n != null) {
+      //   //       setState(() {
+      //   //         accountId = n;
+      //   //       });
+      //   //       Navigator.pushReplacementNamed(
+      //   //         context,
+      //   //         '/landing_page',
+      //   //         arguments: true,
+      //   //       );
+      //   //     } else {
+      //   //       myMetaWallet = null;
+      //   //       tokenSymbol = "KHPRN";
+      //   //       accountId = null;
+      //   //       await _service.disconnect();
+      //   //       Navigator.pushReplacementNamed(context, '/start_screen');
+      //   //     }
+      //   //   },
+      //   // ).then((val) async {
+      //   //   if (!val) {
+      //   //     myMetaWallet = null;
+      //   //     tokenSymbol = "KHPRN";
+      //   //     accountId = null;
+      //   //     await _service.disconnect();
+      //   //   }
+      //   // });
+      // } else {
+      //   Navigator.pushReplacementNamed(context, '/start_screen');
+      // }
+      setState(() {});
+    } else {
+      Navigator.pushReplacementNamed(context, '/start_screen');
+    }
   }
 
   @override

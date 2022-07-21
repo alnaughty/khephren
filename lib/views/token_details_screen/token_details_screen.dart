@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:kprn/constant/khprn.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/models/abi_model/factory/launchpadContract.g.dart';
+import 'package:kprn/models/abi_model/sales/salesContract.g.dart';
 import 'package:kprn/models/contract/constant_contracts.dart';
 import 'package:kprn/models/sales_details_model.dart';
 // import 'package:kprn/salesContract.g.dart';
@@ -31,17 +33,17 @@ class _TokenDetailsState extends State<TokenDetails> {
   // final WalletService _walletService = WalletService.instance;
   // // final MyKHPRNBalanceService _myKHPRNService = MyKHPRNBalanceService.instance;
   // final WalletCredentials _creds = WalletCredentials.instance;
-  // late final SalesContract _contract = SalesContract(
-  //   address: EthereumAddress.fromHex(
-  //     "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-  //     enforceEip55: true,
-  //   ),
-  //   client: Web3Client(
-  //     rpcUrl,
-  //     Client(),
-  //   ),
-  //   chainId: 97,
-  // );
+  late final SalesContract _contract = SalesContract(
+    address: EthereumAddress.fromHex(
+      "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
+      enforceEip55: true,
+    ),
+    client: Web3Client(
+      rpcUrl,
+      Client(),
+    ),
+    chainId: 97,
+  );
   Timer? timer;
   late bool saleTypeisWhiteListed;
   late DateTime _startDate;
@@ -60,6 +62,7 @@ class _TokenDetailsState extends State<TokenDetails> {
   late int liquidityLockupTime;
   late double listingPrice;
   SalesDetailsModel? _details;
+
   late double hardCap;
   late double softCap;
   late Duration presaleDifference;
@@ -90,9 +93,10 @@ class _TokenDetailsState extends State<TokenDetails> {
   final ConstantContracts _constantContracts = ConstantContracts.instance;
 
   Future<void> checkKYCVerified() async {
-    // final LaunchpadFactoryContract _contract = LaunchpadFactoryContract(
+    // await _contract.saleDetails();
+    // final LaunchpadContract _contract = LaunchpadContract(
     //   address: EthereumAddress.fromHex(factoryAddress),
-    //   client: myMetaWallet!.ethClient,
+    //   client: _constantContracts.ethClient,
     //   chainId: myMetaWallet!.session.chainId,
     // );
     // await _constantContracts.launchpadContract

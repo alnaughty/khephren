@@ -47,5 +47,15 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>metamask</string>
+			<string>sms</string>
+			<string>tel</string>
+			<string>sms</string>
+			<string>https</string>
+			<string>*/*</string>
+			<string>intent</string>
+		</array>
 	</dict>
 </plist>

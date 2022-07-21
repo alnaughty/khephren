@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/services/wallet_connect.dart';
 
 class StartScreenPage extends StatefulWidget {
   const StartScreenPage({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class StartScreenPage extends StatefulWidget {
 class _StartScreenPageState extends State<StartScreenPage> {
   bool canConnect = true;
   final Palette _palette = Palette();
+  final WalletConnectService _service = WalletConnectService.instance;
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -70,11 +72,12 @@ class _StartScreenPageState extends State<StartScreenPage> {
                       ),
                       child: TextButton(
                         onPressed: () async {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            "/landing_page",
-                            arguments: false,
-                          );
+                          await _service.connect();
+                          // Navigator.pushReplacementNamed(
+                          //   context,
+                          //   "/landing_page",
+                          //   arguments: false,
+                          // );
                           // print("JAWARS");
                           // await _walletService.connect(
                           //   idCallback: (String? id) {

@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kprn/extensions/string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 
 class WalletConnectService {
@@ -23,8 +26,12 @@ class WalletConnectService {
         clientMeta: _peerMeta,
       );
       await _connector!.connect(
-        chainId: 97,
-        onDisplayUri: requestConnectionOnWallet,
+        chainId: kDebugMode || kProfileMode ? 97 : 56,
+        onDisplayUri: (String uri) async {
+          if (await canLaunchUrl(uri.toUri)) {
+            await launchUrl(uri.toUri);
+          }
+        },
       );
       listen();
       return;
@@ -45,6 +52,7 @@ class WalletConnectService {
         address,
       ],
     );
+    print("SESSION APPROVED");
   }
 
   rejectSession() async {
@@ -67,7 +75,15 @@ class WalletConnectService {
   // sendTransaction(Transaction transaction) async {
   //   await _connector.re
   // }
-  requestConnectionOnWallet(String uri) async {}
+  requestConnectionOnWallet(String uri) async {
+    if (await canLaunchUrl(uri.toUri)) {
+      await launchUrl(uri.toUri);
+    }
+    // await launchUrl(
+    //   Uri.parse(uri),
+    // );
+  }
+
   void listen() async {
     if (_connector != null) {
       _connector!.on("connect", (SessionStatus event) {
