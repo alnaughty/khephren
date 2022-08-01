@@ -1,7 +1,10 @@
-import 'package:kprn/models/contract/constant_contracts.dart';
 import 'package:web3dart/web3dart.dart';
 
 class UserModel {
-  EthereumAddress address;
-  UserModel({required this.address});
+  final EthereumAddress address;
+  final int chainId;
+  UserModel({
+    required this.address,
+    required this.chainId,
+  });
 }

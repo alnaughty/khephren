@@ -205,15 +205,15 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                         itemBuilder: (_, index) =>
                             LaunchPadTokenDetailsAndProgress(
                           onPressed: () async {
-                            widget.handler.fore(
-                              TokenDetails(
-                                onReturn: () {
-                                  widget.handler.back();
-                                },
-                                tokenAddress:
-                                    "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-                              ),
-                            );
+                            // widget.handler.fore(
+                            //   TokenDetails(
+                            //     onReturn: () {
+                            //       widget.handler.back();
+                            //     },
+                            //     tokenAddress:
+                            //         "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
+                            //   ),
+                            // );
                             // setState(() {
                             //   toCheckAddressInfo =
                             //       "0x6174E388588f116728d250Bdf2123816E7ECf88c";

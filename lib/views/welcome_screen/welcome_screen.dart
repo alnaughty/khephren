@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/data_listeners_and_handlers/landing_page_handler.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/models/launchpad_data.dart';
 import 'package:kprn/views/carousel/custom_carousel.dart';
 import 'package:kprn/views/carousel_container/carousel_container.dart';
 import 'package:kprn/views/launchpad_screen/launchpad_screen.dart';
@@ -12,7 +13,11 @@ import 'package:kprn/views/welcome_screen/welcome_helper.dart';
 
 class WelcomeScreen extends StatelessWidget
     with WelcomeHelper, HelperContainer {
-  WelcomeScreen({Key? key}) : super(key: key);
+  WelcomeScreen({
+    Key? key,
+    required this.launchpads,
+  }) : super(key: key);
+  final List<LaunchpadData> launchpads;
   static final LandingPageHandler _landingPageHandler =
       LandingPageHandler.instance;
   @override
@@ -179,50 +184,54 @@ class WelcomeScreen extends StatelessWidget
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 40,
-              ),
-              titleContainer(
-                constraint.maxWidth,
-                title: "Upcoming Projects",
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
+              if (launchpads.isNotEmpty) ...{
+                const SizedBox(
+                  height: 40,
                 ),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 5,
-                separatorBuilder: (_, index) => const SizedBox(
-                  height: 15,
+                titleContainer(
+                  constraint.maxWidth,
+                  title: "Upcoming Projects",
                 ),
-                itemBuilder: (_, index) => tokenInfoMinContainer(
-                  onPressed: () {
-                    _landingPageHandler.update(
-                      TokenDetails(
-                        onReturn: () {
-                          _landingPageHandler.reset();
-                        },
-                        tokenAddress:
-                            "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-                      ),
-                      1,
+                const SizedBox(
+                  height: 20,
+                ),
+                ListView.separated(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: launchpads.length,
+                  separatorBuilder: (_, index) => const SizedBox(
+                    height: 15,
+                  ),
+                  itemBuilder: (_, index) {
+                    final LaunchpadData data = launchpads[index];
+                    return tokenInfoMinContainer(
+                      onPressed: () {
+                        _landingPageHandler.update(
+                          TokenDetails(
+                            onReturn: () {
+                              _landingPageHandler.reset();
+                            },
+                            data: data,
+                          ),
+                          1,
+                        );
+                      },
+                      constraint.maxWidth,
+                      bgColor: base.lighten().withOpacity(.8),
+                      symbol: data.token.symbol,
+                      hardCap: data.hardCap,
+                      imageUrl: data.projectDetails[2],
+                      softCap: data.softCap,
+                      subtitle:
+                          '1 BNB = ${data.presaleRate} ${data.token.symbol}',
+                      title: data.token.name.toUpperCase(),
                     );
                   },
-                  constraint.maxWidth,
-                  bgColor: base.lighten().withOpacity(.8),
-                  symbol: "BONK",
-                  hardCap: 175,
-                  imageUrl:
-                      'https://s2.coinmarketcap.com/static/img/coins/64x64/10407.png',
-                  softCap: 85,
-                  subtitle: '1 BNB = 522.45',
-                  title: 'BABY BONK',
                 ),
-              ),
+              },
               const SafeArea(
                 child: SizedBox(
                   height: 20,

@@ -4,21 +4,44 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kprn/constant/palette.dart';
+import 'package:kprn/data_listeners_and_handlers/landing_page_data_processor.dart';
 import 'package:kprn/data_listeners_and_handlers/landing_page_handler.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/models/user_model.dart';
 import 'package:kprn/views/welcome_screen/welcome_screen.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key}) : super(key: key);
-
+  const LandingPage({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
+  final UserModel user;
   @override
   State<LandingPage> createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
+class _LandingPageState extends State<LandingPage> with LandingDataProcessor {
   final GlobalKey<ScaffoldState> _kScaffold = GlobalKey<ScaffoldState>();
   final LandingPageHandler _handler = LandingPageHandler.instance;
   final Palette _palette = Palette();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      print(widget.user.chainId);
+      await run(97).whenComplete(() => setState(() {}));
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color appbarColor = AppBarTheme.of(context).backgroundColor!;
@@ -132,12 +155,12 @@ class _LandingPageState extends State<LandingPage> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  "asasdasd",
+                                  widget.user.address.toString(),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
                                   ),
@@ -225,7 +248,7 @@ class _LandingPageState extends State<LandingPage> {
                                       title: RichText(
                                         text: const TextSpan(
                                           text: "Owned",
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w400,
                                             fontSize: 15,
@@ -233,7 +256,7 @@ class _LandingPageState extends State<LandingPage> {
                                           children: [
                                             TextSpan(
                                               text: " asdasa",
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             )
@@ -447,7 +470,7 @@ class _LandingPageState extends State<LandingPage> {
           if (!snapshot.hasData || snapshot.hasError) {
             return Container();
           }
-          final int _currentIndex = snapshot.data!;
+          // final int currentIndex = snapshot.data!;
           return LayoutBuilder(
             builder: (_, constraint) => SizedBox(
               width: constraint.maxWidth,
@@ -456,7 +479,9 @@ class _LandingPageState extends State<LandingPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _handler.pageController,
                 children: [
-                  WelcomeScreen(),
+                  WelcomeScreen(
+                    launchpads: upcomingLaunchpads,
+                  ),
                   _handler.secondPage,
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:kprn/constant/palette.dart';
 
 class HelperContainer {
@@ -128,21 +129,39 @@ class HelperContainer {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (imageUrl != null && imageUrl.isNotEmpty) ...{
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        alignment: Alignment.center,
-                        image: NetworkImage(
-                          imageUrl,
-                        ),
-                      ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(120),
+                    child: SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: imageUrl.contains(".svg")
+                          ? SvgPicture.network(
+                              imageUrl,
+                              alignment: Alignment.topLeft,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.network(
+                              imageUrl,
+                              alignment: Alignment.topLeft,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
+                  // Container(
+                  //   width: 60,
+                  //   height: 60,
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white,
+                  //     shape: BoxShape.circle,
+                  //     image: DecorationImage(
+                  //       fit: BoxFit.cover,
+                  //       alignment: Alignment.center,
+                  //       image: NetworkImage(
+                  //         imageUrl,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(
                     width: 10,
                   ),

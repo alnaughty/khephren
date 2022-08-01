@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
 import 'package:kprn/services/wallet_connect.dart';
+import 'package:kprn/view_models/logged_user_vm.dart';
 
 class StartScreenPage extends StatefulWidget {
   const StartScreenPage({Key? key}) : super(key: key);
@@ -15,6 +16,25 @@ class _StartScreenPageState extends State<StartScreenPage> {
   bool canConnect = true;
   final Palette _palette = Palette();
   final WalletConnectService _service = WalletConnectService.instance;
+  final LoggedUserVm _vm = LoggedUserVm.instance;
+
+  @override
+  void initState() {
+    // _vm.stream.listen((user) {
+    //   print("USER!");
+    //   if (user != null) {
+    //     Navigator.pushReplacementNamed(context, '/landing_page');
+    //   }
+    // });
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -73,63 +93,6 @@ class _StartScreenPageState extends State<StartScreenPage> {
                       child: TextButton(
                         onPressed: () async {
                           await _service.connect();
-                          // Navigator.pushReplacementNamed(
-                          //   context,
-                          //   "/landing_page",
-                          //   arguments: false,
-                          // );
-                          // print("JAWARS");
-                          // await _walletService.connect(
-                          //   idCallback: (String? id) {
-                          //     print("ID : $id");
-                          //     if (id != null && canConnect) {
-                          //       setState(() {
-                          //         canConnect = false;
-                          //         accountId = id;
-                          //       });
-                          //       if (cacher != null) {
-                          //         cacher!.accountToken = id;
-                          //       }
-                          //       Navigator.pushReplacementNamed(
-                          //         context,
-                          //         "/landing_page",
-                          //         arguments: false,
-                          //       );
-                          //     }
-                          //   },
-                          // );
-                          // await _walletService.connectAndListen(
-                          //     accountId: (String? id) async {
-                          //   if (id != null && canConnect) {
-                          // setState(() {
-                          //   canConnect = false;
-                          // });
-                          // if (cacher != null) {
-                          //   cacher!.accountToken = id;
-                          // }
-                          //     setState(() {
-                          //       accountId = id;
-                          //     });
-                          // Navigator.pushReplacementNamed(
-                          //   context,
-                          //   "/landing_page",
-                          //   arguments: false,
-                          // );
-                          //   }
-                          // }).then((value) {
-                          //   if (value != null) {
-                          //     if (cacher != null) {
-                          //       cacher!.accountToken = value;
-                          //     }
-                          //     setState(() {
-                          //       accountId = value;
-                          //     });
-                          //     Navigator.pushReplacementNamed(
-                          //       context,
-                          //       "/landing_page",
-                          //     );
-                          //   }
-                          // });
                         },
                         child: SizedBox(
                           height: 55,

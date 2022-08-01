@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:kprn/constant/khprn.dart';
 import 'package:kprn/models/abi_model/factory/launchpadContract.g.dart';
@@ -18,16 +19,12 @@ class ConstantContracts {
   // );
 
   final LaunchpadContract launchpad = LaunchpadContract(
-    address: EthereumAddress.fromHex(factoryAddress),
-    client: _ethClient,
-  );
-  final SalesContract sales = SalesContract(
-    address: EthereumAddress.fromHex(khprnHex), // change to sales contract
+    address: EthereumAddress.fromHex(dotenv.get("FACTORY_ADDRESS")),
     client: _ethClient,
   );
 
   final NFTStakingContract nftStaking = NFTStakingContract(
-    address: EthereumAddress.fromHex(factoryAddress),
+    address: EthereumAddress.fromHex(dotenv.get("FACTORY_ADDRESS")),
     client: _ethClient,
   );
 }
