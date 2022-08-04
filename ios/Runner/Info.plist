@@ -49,6 +49,42 @@
 		<false/>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
+			<string>metamask</string>
+			<string>pillarwallet</string>
+			<string>imtokenv2</string>
+			<string>tpoutside</string>
+			<string>huobiwallet</string>
+			<string>coolwallet</string>
+			<string>bitkeep</string>
+			<string>celowallet</string>
+			<string>bitpie</string>
+			<string>archipage</string>
+			<string>yitoken</string>
+			<string>abt</string>
+			<string>gdwalletwc</string>
+			<string>airgap-wallet</string>
+			<string>halodefiwallet</string>
+			<string>krystalwallet</string>
+			<string>bhcwallet</string>
+			<string>wallet3</string>
+			<string>bitcoincom</string>
+			<string>dfwallet</string>
+			<string>goldbit</string>
+			<string>celo</string>
+			<string>uvtoken</string>
+			<string>wattwallet</string>
+			<string>frontier</string>
+			<string>ancrypto</string>
+			<string>ttmwalletapp</string>
+			<string>thorwallet</string>
+			<string>okex</string>
+			<string>dentacoin-wallet</string>
+			<string>helix-id</string>
+			<string>talkapp</string>
+			<string>zeluswallet</string>
+			<string>cryptobrowser</string>
+			<string>abra</string>
+			<string>paybolt</string>
 			<string>wc</string>
 			<string>https</string>
 			<string>*/*</string>

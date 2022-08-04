@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Navigator.pushReplacementNamed(context, '/start_screen');
     String? tok = cacher.ethereumAddress;
     if (tok != null) {
-      await _service.connect();
+      // await _service.connect();
       Navigator.pushReplacementNamed(context, '/decision_screen');
     } else {
       Navigator.pushReplacementNamed(context, '/decision_screen');

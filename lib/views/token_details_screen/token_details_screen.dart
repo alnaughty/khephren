@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:clipboard/clipboard.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ethers/ethers.dart';
 import 'package:ethers/providers/json_rpc_provider.dart';
 import 'package:ethers/providers/types/transaction_types.dart';
 import 'package:ethers/signers/json_rpc_signer.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
@@ -22,8 +25,7 @@ import 'package:kprn/models/user_model.dart';
 import 'package:kprn/services/meta/sales_function.dart';
 import 'package:kprn/services/wallet_connect.dart';
 import 'package:kprn/view_models/logged_user_vm.dart';
-import 'package:walletconnect_dart/walletconnect_dart.dart';
-// import 'package:kprn/salesContract.g.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
 class TokenDetails extends StatefulWidget {
@@ -42,61 +44,47 @@ class _TokenDetailsState extends State<TokenDetails> {
   late final ScrollController _scrollController;
   late final SalesFunction salesFunction =
       SalesFunction(widget.data.saleAddress);
-  late final Ethers ethers = Ethers();
   late final symbol = widget.data.token.symbol;
   double? balance;
-  late final DeployedContract _contractt;
-  void getContract() async {
-    // final String abiFile =
-    //     await rootBundle.loadString("assets/abis/salesContract.json");
-    // setState(() {
-    //   _contractt = DeployedContract(
-    //     ContractAbi.fromJson(abiFile, "Sale"),
-    //     EthereumAddress.fromHex(
-    //       widget.data.saleAddress,
-    //     ),
-    //   );
-    // });
-  }
-
-  // late final DeployedContract _contractt = DeployedContract(
-  //   ContractAbi.fromJson("jsonData", "name"),
-  //   EthereumAddress.fromHex(
-  //     widget.data.saleAddress,
-  //     enforceEip55: true,
-  //   ),
-  // );
   final WalletConnectService _wcs = WalletConnectService.instance;
   late bool isPresale =
       DateTime.now().compareTo(widget.data.startDate.toUtc()) > 0 &&
           DateTime.now().compareTo(widget.data.endDate) < 0;
   late bool presaleNotStarted =
       DateTime.now().compareTo(widget.data.startDate.toUtc()) < 0;
-  // late final bool isPresaleStart =
-  //     DateTime.now().compareTo(widget.data.startDate) > 0;
-  // late final bool isPresaleEnd =
-  //     DateTime.now().compareTo(widget.data.endDate) > 0;
   late final String? description = widget.data.projectDetails[0];
-  // final WalletService _walletService = WalletService.instance;
-  // // final MyKHPRNBalanceService _myKHPRNService = MyKHPRNBalanceService.instance;
-  // final WalletCredentials _creds = WalletCredentials.instance;
   var httpClient = Client();
   late var ethClient = Web3Client(rpcUrl, httpClient);
   final LoggedUserVm _vm = LoggedUserVm.instance;
-  // final WalletConnectProvider provider = WalletConnectProvider();
-  // final WalletConnectService _wcService = WalletConnectService.instance;
-  void purchase(String userAddress, BigInt amount) async {
-    await salesFunction
-        .purchase(userAddress: userAddress, amount: amount)
-        .then((value) {
-      print(value);
+  Future<void> purchase(EthereumAddress userAddress, BigInt amount) async {
+    await _wcs.connector.openWalletApp();
+    await _wcs.connector
+        .purchaseSale(
+      recipientAddress: widget.data.saleAddress,
+      amount: 0.02,
+      contract: _contract,
+    )
+        .then((value) async {
+      if (value != null) {
+        final Uint8List list = hexToBytes(value);
+      }
+      print("TRANSACTION : $value");
     });
   }
 
+  late final BlockchainToken _tokenContract = BlockchainToken(
+    address: EthereumAddress.fromHex(
+      widget.data.saleAddress,
+    ),
+    client: Web3Client(
+      rpcUrl,
+      Client(),
+    ),
+    chainId: 97,
+  );
   late final SalesContract _contract = SalesContract(
     address: EthereumAddress.fromHex(
       widget.data.saleAddress,
-      enforceEip55: true,
     ),
     client: Web3Client(
       rpcUrl,
@@ -105,51 +93,16 @@ class _TokenDetailsState extends State<TokenDetails> {
     chainId: 97,
   );
   Timer? timer;
-  Future<List<dynamic>> callFunction(String name) async {
-    // final contract = await getContract();
-    final function = _contractt.function(name);
-    final result = await ethClient
-        .call(contract: _contractt, function: function, params: []);
-    // return result;
-    return result;
-  }
-
-  // void purchase() async {
-  //   List<dynamic> result = await callFunction("purchase");
-  //   print("PURCHASE RESULT : $result");
-  // }
 
   void getBalance() async {
-    // balance =
-    // print(_contract.sa);
     await _contract.raised().then((value) {
       setState(() {
         balance =
             EtherAmount.inWei(value).getValueInUnit(EtherUnit.ether).toDouble();
       });
-      print("TOKEN BALANCE : $balance");
-      print("VALUE : $value");
     });
   }
-  // late bool saleTypeisWhiteListed;
-  // late DateTime _startDate;
-  // late DateTime _endDate;
-  // late bool isPresale;
-  // late bool isKYCVerified;
-  // late double minBuy;
-  // late String saleAddress;
-  // late double maxBuy;
-  // late double totalSupply;
-  // late double tokensForPresale;
-  // late double tokensForLiquidity;
-  // late double presaleRate;
-  // late double liquidityPercent;
-  // late int liquidityLockupTime;
-  // late double listingPrice;
-  // SalesDetailsModel? _details;
 
-  // late double hardCap;
-  // late double softCap;
   Duration? presaleDifference;
   void initPresaleCounter() {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -161,11 +114,6 @@ class _TokenDetailsState extends State<TokenDetails> {
           .difference(
         DateTime.now(),
       );
-      // if (isPresale) {
-      // } else {
-      //   isPresale = false;
-      // }
-      //   disposeTimer();
       setState(() {});
     });
   }
@@ -189,7 +137,6 @@ class _TokenDetailsState extends State<TokenDetails> {
   );
   @override
   void initState() {
-    getContract();
     getBalance();
     if (widget.data.state == 0) {
       initPresaleCounter();
@@ -496,11 +443,14 @@ class _TokenDetailsState extends State<TokenDetails> {
                                     child: MaterialButton(
                                       padding: const EdgeInsets.all(0),
                                       onPressed: () async {
-                                        final Ethers ethers = Ethers();
+                                        // final Ethers ethers = Ethers();
                                         final UserModel? user = _vm.current;
+                                        // final BigInt amount =
+                                        //     ethers.utils.parseEther("0.05");
+                                        // print(amount);
                                         purchase(
-                                          user!.address.toString(),
-                                          ethers.utils.parseEther("0.05"),
+                                          user!.address,
+                                          ethers.utils.parseEther("0.02"),
                                         );
                                       },
                                       height: 60,

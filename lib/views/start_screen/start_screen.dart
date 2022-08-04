@@ -92,7 +92,7 @@ class _StartScreenPageState extends State<StartScreenPage> {
                       ),
                       child: TextButton(
                         onPressed: () async {
-                          await _service.connect();
+                          await _service.connect(context);
                         },
                         child: SizedBox(
                           height: 55,
