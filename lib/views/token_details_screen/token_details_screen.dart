@@ -1,15 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
+
 import 'package:clipboard/clipboard.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ethers/ethers.dart';
-import 'package:ethers/providers/json_rpc_provider.dart';
-import 'package:ethers/providers/types/transaction_types.dart';
-import 'package:ethers/signers/json_rpc_signer.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
@@ -17,15 +11,14 @@ import 'package:intl/intl.dart';
 import 'package:kprn/constant/khprn.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
-import 'package:kprn/models/abi_model/blockchainToken.g.dart';
 import 'package:kprn/models/abi_model/sales/salesContract.g.dart';
 import 'package:kprn/models/contract/constant_contracts.dart';
 import 'package:kprn/models/launchpad_data.dart';
 import 'package:kprn/models/user_model.dart';
-import 'package:kprn/services/meta/sales_function.dart';
 import 'package:kprn/services/wallet_connect.dart';
 import 'package:kprn/view_models/logged_user_vm.dart';
-import 'package:web3dart/crypto.dart';
+import 'package:kprn/views/buy_with_bnb/buy_with_bnb.dart';
+import 'package:kprn/views/progress_viewer/progress_viewer.dart';
 import 'package:web3dart/web3dart.dart';
 
 class TokenDetails extends StatefulWidget {
@@ -42,46 +35,16 @@ class TokenDetails extends StatefulWidget {
 
 class _TokenDetailsState extends State<TokenDetails> {
   late final ScrollController _scrollController;
-  late final SalesFunction salesFunction =
-      SalesFunction(widget.data.saleAddress);
   late final symbol = widget.data.token.symbol;
+  late final UserModel user = _vm.current!;
   double? balance;
-  final WalletConnectService _wcs = WalletConnectService.instance;
   late bool isPresale =
       DateTime.now().compareTo(widget.data.startDate.toUtc()) > 0 &&
           DateTime.now().compareTo(widget.data.endDate) < 0;
   late bool presaleNotStarted =
       DateTime.now().compareTo(widget.data.startDate.toUtc()) < 0;
   late final String? description = widget.data.projectDetails[0];
-  var httpClient = Client();
-  late var ethClient = Web3Client(rpcUrl, httpClient);
-  final LoggedUserVm _vm = LoggedUserVm.instance;
-  Future<void> purchase(EthereumAddress userAddress, BigInt amount) async {
-    await _wcs.connector.openWalletApp();
-    await _wcs.connector
-        .purchaseSale(
-      recipientAddress: widget.data.saleAddress,
-      amount: 0.02,
-      contract: _contract,
-    )
-        .then((value) async {
-      if (value != null) {
-        final Uint8List list = hexToBytes(value);
-      }
-      print("TRANSACTION : $value");
-    });
-  }
 
-  late final BlockchainToken _tokenContract = BlockchainToken(
-    address: EthereumAddress.fromHex(
-      widget.data.saleAddress,
-    ),
-    client: Web3Client(
-      rpcUrl,
-      Client(),
-    ),
-    chainId: 97,
-  );
   late final SalesContract _contract = SalesContract(
     address: EthereumAddress.fromHex(
       widget.data.saleAddress,
@@ -90,15 +53,14 @@ class _TokenDetailsState extends State<TokenDetails> {
       rpcUrl,
       Client(),
     ),
-    chainId: 97,
+    chainId: user.chainId,
   );
   Timer? timer;
-
+  final LoggedUserVm _vm = LoggedUserVm.instance;
   void getBalance() async {
     await _contract.raised().then((value) {
       setState(() {
-        balance =
-            EtherAmount.inWei(value).getValueInUnit(EtherUnit.ether).toDouble();
+        balance = double.parse(ethers.utils.formatEther(value));
       });
     });
   }
@@ -127,8 +89,6 @@ class _TokenDetailsState extends State<TokenDetails> {
     }
   }
 
-  final ConstantContracts _constantContracts = ConstantContracts.instance;
-
   final TextStyle whiteStyle = const TextStyle(
     color: Colors.white,
     fontWeight: FontWeight.w700,
@@ -142,7 +102,6 @@ class _TokenDetailsState extends State<TokenDetails> {
       initPresaleCounter();
     }
     _scrollController = ScrollController();
-    // TODO: implement initState
     super.initState();
   }
 
@@ -154,9 +113,40 @@ class _TokenDetailsState extends State<TokenDetails> {
     super.dispose();
   }
 
+  final Ethers ethers = Ethers();
+  final WalletConnectService _wcs = WalletConnectService.instance;
+
+  Future<double> getMaxBuy() async {
+    bool isFairLunch = widget.data.type != "0x0";
+    final double walletBal = await _wcs.connector.getBalance();
+    if (isFairLunch) {
+      return walletBal;
+    }
+    final TotalContributions totalContributions =
+        await _contract.totalContributions(user.address);
+    final BigInt total = totalContributions.var1;
+    print(ethers.utils.formatEther(total));
+    double initMax = widget.data.maxBuy -
+        double.parse(
+          ethers.utils.formatEther(total),
+        );
+
+    double result = initMax;
+    if (initMax > (widget.data.hardCap - balance!)) {
+      print("dd1");
+      result = (widget.data.hardCap - balance!);
+    } else if (initMax > walletBal) {
+      print("dd");
+      result = walletBal;
+    }
+    print("MAX : $result");
+    return double.parse(result.toStringAsFixed(16));
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color base = AppBarTheme.of(context).backgroundColor!;
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -344,77 +334,11 @@ class _TokenDetailsState extends State<TokenDetails> {
                             const SizedBox(
                               height: 30,
                             ),
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        text: "Progress : ",
-                                        style: whiteStyle.copyWith(
-                                          color: Palette.borderColor
-                                              .withOpacity(.5),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                "${((balance! / (widget.data.type == "0x0" ? widget.data.hardCap : widget.data.softCap)) * 100).toStringAsFixed(2)}%",
-                                            style: whiteStyle.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              color: Palette.borderColor
-                                                  .withOpacity(.5),
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      "$balance",
-                                      style: whiteStyle.copyWith(
-                                        color:
-                                            Palette.borderColor.withOpacity(.5),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    width: double.maxFinite,
-                                    height: 18,
-                                    color: Colors.white,
-                                    child: LayoutBuilder(
-                                      builder: (_, constraint) => Align(
-                                        alignment:
-                                            AlignmentDirectional.centerStart,
-                                        child: Container(
-                                          width: constraint.maxWidth *
-                                              (balance! /
-                                                  (widget.data.type == "0x0"
-                                                      ? widget.data.hardCap
-                                                      : widget.data.softCap)),
-                                          height: 18,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            color: const Color(0xff21CDD8),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            ProgressViewer(
+                              contract: _contract,
+                              type: widget.data.type,
+                              softCap: widget.data.softCap,
+                              hardCap: widget.data.hardCap,
                             ),
                           },
                           const SizedBox(
@@ -443,14 +367,34 @@ class _TokenDetailsState extends State<TokenDetails> {
                                     child: MaterialButton(
                                       padding: const EdgeInsets.all(0),
                                       onPressed: () async {
-                                        // final Ethers ethers = Ethers();
-                                        final UserModel? user = _vm.current;
-                                        // final BigInt amount =
-                                        //     ethers.utils.parseEther("0.05");
-                                        // print(amount);
-                                        purchase(
-                                          user!.address,
-                                          ethers.utils.parseEther("0.02"),
+                                        double max = await getMaxBuy();
+                                        await showModalBottomSheet(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          // isDismissible: true,
+                                          backgroundColor: Colors.transparent,
+                                          constraints: BoxConstraints(
+                                            maxHeight: size.height,
+                                          ),
+                                          builder: (
+                                            _,
+                                          ) =>
+                                              BuyWithBnb(
+                                            minBuy: widget.data.minBuy,
+                                            maxBuy: max,
+                                            bnbEquivalent:
+                                                widget.data.presaleRate,
+                                            tokenImage: Image.network(
+                                              widget.data.projectDetails[2],
+                                              fit: BoxFit.cover,
+                                              width: 30,
+                                              height: 30,
+                                            ),
+                                            tokenSymbol: symbol,
+                                            salesAddress:
+                                                widget.data.saleAddress,
+                                            contract: _contract,
+                                          ),
                                         );
                                       },
                                       height: 60,
@@ -508,12 +452,6 @@ class _TokenDetailsState extends State<TokenDetails> {
                 const SizedBox(
                   height: 40,
                 ),
-                // contentContainer(
-                //   base,
-                //   forAddress: true,
-                //   title: "Presale Address",
-                //   value: _contract.self.address.hex,
-                // ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -570,8 +508,8 @@ class _TokenDetailsState extends State<TokenDetails> {
                 ),
                 contentContainer(
                   base,
-                  title: "Lisitng Rate",
-                  value: "1 BNB = ${1 / widget.data.listingRate} $symbol",
+                  title: "Listing Rate",
+                  value: "1 BNB = ${(widget.data.listingRate)} $symbol",
                 ),
                 const SizedBox(
                   height: 20,
@@ -620,27 +558,6 @@ class _TokenDetailsState extends State<TokenDetails> {
             ),
           ),
         ),
-        // child: _details == null
-        //     ? Column(
-        //         mainAxisAlignment: MainAxisAlignment.center,
-        //         children: [
-        //           const KhephrenProgressIndicator(
-        //             size: 100,
-        //             color: Palette.kToDark,
-        //           ),
-        //           const SizedBox(
-        //             height: 40,
-        //           ),
-        //           Text(
-        //             "Fetching Token Details",
-        //             style: whiteStyle.copyWith(
-        //               fontSize: 14,
-        //               color: Colors.white.withOpacity(.5),
-        //             ),
-        //           )
-        //         ],
-        //       )
-        //     : ,
       ),
     );
   }

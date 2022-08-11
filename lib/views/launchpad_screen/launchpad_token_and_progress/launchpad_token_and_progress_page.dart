@@ -1,9 +1,16 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:kprn/constant/khprn.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/extensions/color_extension.dart';
+import 'package:kprn/models/abi_model/sales/salesContract.g.dart';
 import 'package:kprn/models/token_network.dart';
+import 'package:kprn/models/user_model.dart';
+import 'package:kprn/view_models/logged_user_vm.dart';
+import 'package:kprn/views/progress_viewer/progress_viewer.dart';
+import 'package:web3dart/web3dart.dart';
 
 class LaunchPadTokenDetailsAndProgress extends StatefulWidget {
   const LaunchPadTokenDetailsAndProgress({
@@ -17,17 +24,21 @@ class LaunchPadTokenDetailsAndProgress extends StatefulWidget {
     required this.networkImage,
     required this.symbol,
     this.onPressed,
-    required this.maxProgressRate,
+    required this.salesAddress,
+    required this.type,
+    // required this.maxProgressRate,
   }) : super(key: key);
   final String name;
   final String symbol;
   final TokenNetwork network;
   final double progress;
-  final double maxProgressRate;
+  final String salesAddress;
+  // final double maxProgressRate;
   final String address;
   final DateTime startDate;
   final String? networkImage;
   final DateTime? endDate;
+  final String type;
   final Function()? onPressed;
   @override
   State<LaunchPadTokenDetailsAndProgress> createState() =>
@@ -36,6 +47,18 @@ class LaunchPadTokenDetailsAndProgress extends StatefulWidget {
 
 class _LaunchPadTokenDetailsAndProgressState
     extends State<LaunchPadTokenDetailsAndProgress> {
+  late final UserModel user = _vm.current!;
+  late final SalesContract _contract = SalesContract(
+    address: EthereumAddress.fromHex(
+      widget.salesAddress,
+    ),
+    client: Web3Client(
+      rpcUrl,
+      Client(),
+    ),
+    chainId: user.chainId,
+  );
+  final LoggedUserVm _vm = LoggedUserVm.instance;
   final Palette _palette = Palette();
   final TextStyle style = const TextStyle(
     color: Colors.white,
@@ -186,50 +209,55 @@ class _LaunchPadTokenDetailsAndProgressState
           const SizedBox(
             height: 30,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  "Progress ${(widget.progress * 100).round()}%",
-                  style: style.copyWith(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(.3),
-                  ),
-                ),
-              ),
-              Text(
-                "${(widget.maxProgressRate * widget.progress).toInt()}",
-                style: style.copyWith(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(.3),
-                ),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              width: double.maxFinite,
-              height: 18,
-              color: Colors.white,
-              child: LayoutBuilder(
-                builder: (_, constraint) => Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Container(
-                    width: constraint.maxWidth * widget.progress,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: const Color(0xff21CDD8),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          ProgressViewer(
+              contract: _contract,
+              type: widget.type,
+              softCap: widget.network.softCap,
+              hardCap: widget.network.hardCap),
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: Text(
+          //         "Progress ${(widget.progress * 100).round()}%",
+          //         style: style.copyWith(
+          //           fontSize: 13,
+          //           color: Colors.white.withOpacity(.3),
+          //         ),
+          //       ),
+          //     ),
+          //     Text(
+          //       "${(widget.maxProgressRate * widget.progress).toInt()}",
+          //       style: style.copyWith(
+          //         fontSize: 13,
+          //         color: Colors.white.withOpacity(.3),
+          //       ),
+          //     )
+          //   ],
+          // ),
+          // const SizedBox(
+          //   height: 20,
+          // ),
+          // ClipRRect(
+          //   borderRadius: BorderRadius.circular(20),
+          //   child: Container(
+          //     width: double.maxFinite,
+          //     height: 18,
+          //     color: Colors.white,
+          //     child: LayoutBuilder(
+          //       builder: (_, constraint) => Align(
+          //         alignment: AlignmentDirectional.centerStart,
+          //         child: Container(
+          //           width: constraint.maxWidth * widget.progress,
+          //           height: 18,
+          //           decoration: BoxDecoration(
+          //             borderRadius: BorderRadius.circular(20),
+          //             color: const Color(0xff21CDD8),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           const SizedBox(
             height: 30,
           ),

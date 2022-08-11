@@ -6,7 +6,7 @@ import 'package:web3dart/web3dart.dart';
 
 abstract class TestConnector {
   Future<SessionStatus?> connect(BuildContext context);
-
+  Future<void> disconnect();
   Future<String?> sendTestingAmount({
     required String recipientAddress,
     required double amount,

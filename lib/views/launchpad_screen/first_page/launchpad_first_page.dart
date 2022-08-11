@@ -1,11 +1,17 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:kprn/constant/palette.dart';
 import 'package:kprn/data_listeners_and_handlers/launchpad_page_handler.dart';
+import 'package:kprn/models/launchpad_data.dart';
 import 'package:kprn/models/token_network.dart';
+import 'package:kprn/models/user_model.dart';
+import 'package:kprn/services/API/launchpad.dart';
+import 'package:kprn/view_models/logged_user_vm.dart';
 import 'package:kprn/views/launchpad_screen/launchpad_token_and_progress/launchpad_token_and_progress_page.dart';
 import 'package:kprn/views/token_details_screen/token_details_screen.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LaunchpadFirstPage extends StatefulWidget {
   const LaunchpadFirstPage({
@@ -22,18 +28,55 @@ class LaunchpadFirstPage extends StatefulWidget {
 
 class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
   final Palette _palette = Palette();
+  final LoggedUserVm _vm = LoggedUserVm.instance;
+  late final UserModel user = _vm.current!;
   late final TextEditingController _searchController;
   final FocusNode focusNode = FocusNode();
+  List<LaunchpadData>? launchpads;
   bool _stakedOnly = false;
   String? selectedSort;
+  final BehaviorSubject<String> searchString = BehaviorSubject<String>();
+  late final StreamSubscription<String> listener;
+  List<String> sortBy = [
+    "hard_cap",
+    "soft_cap",
+    'start_date',
+    "end_date",
+  ];
   @override
   void initState() {
     _searchController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      launchpads = await fetchLaunchPads(
+        "",
+      );
+      setState(() {});
+    });
+    listener = searchString
+        .debounceTime(const Duration(milliseconds: 1500))
+        .listen((toSearch) async {
+      setState(() {
+        launchpads = null;
+      });
+      launchpads = await fetchLaunchPads(toSearch);
+      setState(() {});
+    });
     super.initState();
+  }
+
+  final LaunchpadApi api = LaunchpadApi();
+  Future<List<LaunchpadData>> fetchLaunchPads(String toSearch) async {
+    FocusScope.of(context).unfocus();
+    return await api.fetch(
+      chainId: user.chainId,
+      toSearch: toSearch,
+      filter: selectedSort ?? "",
+    );
   }
 
   @override
   void dispose() {
+    listener.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -91,6 +134,9 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                         style: TextStyle(
                           color: _palette.kNToDark,
                         ),
+                        onChanged: (text) {
+                          searchString.add(text);
+                        },
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: "Search Pool.",
@@ -99,6 +145,19 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                             color: focusNode.hasFocus
                                 ? _palette.kNToDark
                                 : Colors.grey.shade600,
+                          ),
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              _searchController.text = "";
+                              setState(() {});
+                              searchString.add("");
+                            },
+                            child: Icon(
+                              Icons.clear,
+                              color: focusNode.hasFocus
+                                  ? _palette.kNToDark
+                                  : Colors.grey.shade600,
+                            ),
                           ),
                         ),
                       ),
@@ -136,12 +195,14 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                                       color: Colors.grey.shade600,
                                     ),
                                   ),
-                                  items: ["1", '2']
+                                  items: sortBy
                                       .map(
                                         (e) => DropdownMenuItem<String>(
                                           value: e,
                                           child: Text(
-                                            e,
+                                            e
+                                                .replaceAll("_", " ")
+                                                .toUpperCase(),
                                             style: TextStyle(
                                               color: selectedSort == null
                                                   ? Colors.grey.shade600
@@ -155,9 +216,17 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                                       ? Colors.grey.shade600
                                       : Colors.white,
                                   value: selectedSort,
-                                  onChanged: (value) {
+                                  onChanged: (value) async {
                                     setState(() {
                                       selectedSort = value;
+                                      launchpads = null;
+                                    });
+                                    List<LaunchpadData> dd =
+                                        await fetchLaunchPads(
+                                      _searchController.text,
+                                    );
+                                    setState(() {
+                                      launchpads = dd;
                                     });
                                   },
                                 ),
@@ -199,59 +268,78 @@ class _LaunchpadFirstPageState extends State<LaunchpadFirstPage> {
                       const SizedBox(
                         height: 40,
                       ),
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (_, index) =>
-                            LaunchPadTokenDetailsAndProgress(
-                          onPressed: () async {
-                            // widget.handler.fore(
-                            //   TokenDetails(
-                            //     onReturn: () {
-                            //       widget.handler.back();
-                            //     },
-                            //     tokenAddress:
-                            //         "0x001BC0341CFC7e6f3B3DD67bcBBd44aB55Ed3cb9",
-                            //   ),
-                            // );
-                            // setState(() {
-                            //   toCheckAddressInfo =
-                            //       "0x6174E388588f116728d250Bdf2123816E7ECf88c";
-                            // });
-                            // await _pageController.animateToPage(
-                            //   1,
-                            //   curve: Curves.decelerate,
-                            //   duration: const Duration(milliseconds: 500),
-                            // );
-                          },
-                          name: "Baby Bonk",
-                          symbol: "BONK",
-                          maxProgressRate: Random().nextInt(200000) + 10,
-                          networkImage:
-                              "https://assets.coingecko.com/coins/images/19153/small/dobo.png?1640080606",
-                          network: const TokenNetwork(
-                            usdtEquivalent: 0.32,
-                            name: "BNB",
-                            tokenEquivalent: 700,
-                            networkIconPath:
-                                "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png?1644979850",
-                            softCap: 85,
-                            hardCap: 170,
+                      if (launchpads != null) ...{
+                        if (launchpads!.isNotEmpty) ...{
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (_, index) {
+                              LaunchpadData data = launchpads![index];
+                              return LaunchPadTokenDetailsAndProgress(
+                                onPressed: () async {
+                                  widget.handler.fore(
+                                    TokenDetails(
+                                      onReturn: () {
+                                        widget.handler.back();
+                                      },
+                                      data: data,
+                                    ),
+                                  );
+                                },
+                                name: data.token.name,
+                                symbol: data.token.symbol,
+                                // maxProgressRate: Random().nextInt(200000) + 10,
+                                networkImage: data.projectDetails[2],
+                                network: TokenNetwork(
+                                  usdtEquivalent: 0.0,
+                                  name: "BNB",
+                                  tokenEquivalent: data.listingRate,
+                                  networkIconPath:
+                                      "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png?1644979850",
+                                  softCap: data.softCap,
+                                  hardCap: data.hardCap,
+                                ),
+                                progress: Random().nextDouble(),
+                                startDate: data.startDate,
+                                endDate: data.endDate,
+                                address: data.token.address,
+                                salesAddress: data.saleAddress, type: data.type,
+                              );
+                            },
+                            separatorBuilder: (_, index) => const SizedBox(
+                              height: 25,
+                            ),
+                            itemCount: launchpads!.length,
                           ),
-                          progress: Random().nextDouble(),
-                          startDate: DateTime.now(),
-                          endDate: DateTime(
-                            int.parse("20${(Random().nextInt(30) + 23)}"),
-                            Random().nextInt(12) + 1,
-                            Random().nextInt(31) + 1,
+                          const SizedBox(
+                            height: 20,
                           ),
-                          address: "0x6174E388588f116728d250Bdf2123816E7ECf88c",
-                        ),
-                        separatorBuilder: (_, index) => const SizedBox(
-                          height: 25,
-                        ),
-                        itemCount: 3,
-                      ),
+                        } else ...{
+                          const SizedBox(
+                            width: double.maxFinite,
+                            height: 200,
+                            child: Center(
+                              child: Text(
+                                "NO LAUNCHPAD FOUND ON YOUR QUERY",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white24,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        },
+                      } else ...{
+                        const SizedBox(
+                          width: double.maxFinite,
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
+                        )
+                      },
                     ],
                   ),
                 )

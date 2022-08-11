@@ -1,9 +1,5 @@
-import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:kprn/extensions/string.dart';
 import 'package:kprn/extensions/test_connect.dart';
 import 'package:kprn/models/user_model.dart';
-import 'package:kprn/services/extension/credentials.dart';
 import 'package:kprn/services/implemetation/eth_connector.dart';
 import 'package:kprn/view_models/logged_user_vm.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
@@ -25,6 +21,10 @@ class WalletConnectService {
     });
   }
 
+  Future<void> disconnect() async {
+    await connector.disconnect();
+  }
+
   listen() {
     connector.registerListeners(
       /// On connect
@@ -34,23 +34,22 @@ class WalletConnectService {
             address: EthereumAddress.fromHex(status.accounts[0]),
             chainId: status.chainId,
           );
-          // _provider = EthereumWalletConnectProvider(
-          //   connector!,
-          //   chainId: event.chainId,
-          // );
           print("CHAIN ID CONNECTED : ${status.chainId}");
           _vm.populate(_user);
         } else {
-          // rejectSession();
           _vm.populate(null);
         }
       },
 
       /// On Update Session
-      (WCSessionUpdateResponse response) {},
+      (WCSessionUpdateResponse response) {
+        print("SESSION UPDATED");
+      },
 
       /// On Disconnect
       () async {
+        // await disconnect();
+        // print("DISCONNECTED: ${connector.}");
         _vm.populate(null);
       },
     );

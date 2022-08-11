@@ -8,6 +8,7 @@ import 'package:kprn/data_listeners_and_handlers/landing_page_data_processor.dar
 import 'package:kprn/data_listeners_and_handlers/landing_page_handler.dart';
 import 'package:kprn/extensions/color_extension.dart';
 import 'package:kprn/models/user_model.dart';
+import 'package:kprn/services/wallet_connect.dart';
 import 'package:kprn/views/welcome_screen/welcome_screen.dart';
 
 class LandingPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class _LandingPageState extends State<LandingPage> with LandingDataProcessor {
   final GlobalKey<ScaffoldState> _kScaffold = GlobalKey<ScaffoldState>();
   final LandingPageHandler _handler = LandingPageHandler.instance;
   final Palette _palette = Palette();
-
+  final WalletConnectService _wcs = WalletConnectService.instance;
   @override
   void initState() {
     // TODO: implement initState
@@ -361,8 +362,9 @@ class _LandingPageState extends State<LandingPage> with LandingDataProcessor {
                   Align(
                     alignment: AlignmentDirectional.center,
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop(null);
+                        await _wcs.connector.disconnect();
                         // Navigator.pushReplacementNamed(
                         //   context,
                         //   "/start_screen",
@@ -370,7 +372,7 @@ class _LandingPageState extends State<LandingPage> with LandingDataProcessor {
                         // _myKHPRNBalance.populate(0.0);
                         // _service.disconnect();
                         // cacher!.removeToken();
-                        setState(() {});
+                        // setState(() {});
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

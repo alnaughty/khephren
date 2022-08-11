@@ -32,7 +32,19 @@ class EthereumTestConnector implements TestConnector {
 
   @override
   Future<SessionStatus?> connect(BuildContext context) async {
+    if (_connector.connector.connected) {
+      await _connector.connector.killSession();
+      await Future.delayed(const Duration(milliseconds: 500));
+      print("CONNECTED PA!");
+    }
+    // ignore: use_build_context_synchronously
     return await _connector.connect(context, chainId: 3);
+  }
+
+  @override
+  Future<void> disconnect() async {
+    // _connector.connector.killSession();
+    return await _connector.killSession();
   }
 
   @override
@@ -61,10 +73,7 @@ class EthereumTestConnector implements TestConnector {
     final etherAmount = EtherAmount.inWei(ethers.utils.parseEther("$amount"));
     print(etherAmount.getInWei);
     final transaction = Transaction(
-      // to: recipient,
       from: sender,
-      // gasPrice: EtherAmount.inWei(BigInt.one),
-      // maxGas: 100000,
       value: etherAmount,
     );
     final credentials = WalletConnectEthereumCredentials(provider: _provider);

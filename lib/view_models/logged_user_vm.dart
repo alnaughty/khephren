@@ -6,7 +6,7 @@ class LoggedUserVm {
   static final LoggedUserVm _instance = LoggedUserVm._pr();
   static LoggedUserVm get instance => _instance;
 
-  final BehaviorSubject<UserModel?> _subject = BehaviorSubject<UserModel>();
+  final BehaviorSubject<UserModel?> _subject = BehaviorSubject<UserModel?>();
   Stream<UserModel?> get stream => _subject.stream;
   UserModel? get current => _subject.value;
 

@@ -259,7 +259,7 @@ packages:
       name: external_app_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -969,10 +969,10 @@ packages:
   walletconnect_qrcode_modal_dart:
     dependency: "direct main"
     description:
-      name: walletconnect_qrcode_modal_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.5"
+      path: "/Users/qonvexmacmini/Desktop/packages/custom/walletconnect_qrcode_modal_dart"
+      relative: false
+    source: path
+    version: "0.0.7"
   watcher:
     dependency: transitive
     description:

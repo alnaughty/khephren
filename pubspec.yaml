@@ -31,7 +31,8 @@ dependencies:
   # walletconnect_dart:
   #   git: https://github.com/RootSoft/walletconnect-dart-sdk
 
-  walletconnect_qrcode_modal_dart: ^0.0.5
+  walletconnect_qrcode_modal_dart:
+    path: /Users/qonvexmacmini/Desktop/packages/custom/walletconnect_qrcode_modal_dart
   web3dart: ^2.3.5
 dev_dependencies:
   build_runner: ^2.2.0
